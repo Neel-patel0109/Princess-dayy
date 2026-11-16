@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Happy Princess Day, Jeeyu</title>
+<style>
+html,body{height:100%;margin:0;background:#f6d9e4;overflow:hidden;font-family:Georgia,serif;overscroll-behavior:none;touch-action:manipulation;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
+#msg{display:none;position:fixed;z-index:20;left:50%;top:38%;transform:translateX(-50%);width:min(86vw,520px);box-sizing:border-box;padding:20px;text-align:center;color:#8a1c46;background:rgba(255,255,255,.92);border-radius:16px;font:18px Georgia,serif}
+#title{z-index:10;position:fixed;left:0;right:0;top:calc(env(safe-area-inset-top,0px) + 16px);text-align:center;color:#c2185b;font-size:clamp(22px,6vw,40px);font-style:italic;text-shadow:0 2px 10px #fff,0 0 4px #fff;transition:opacity 1.2s;pointer-events:none;padding:0 12px}
+#title small{display:block;font-size:.5em;margin-top:6px}
+#btn{z-index:10;position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 40px);transform:translateX(-50%);display:none;border:0;border-radius:999px;background:#e8456f;color:#fff;font:600 16px system-ui,-apple-system,sans-serif;padding:13px 26px;min-height:46px;box-shadow:0 4px 16px rgba(0,0,0,.3);cursor:pointer}
+#wish{z-index:10;position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 56px);transform:translateX(-50%);max-width:86vw;text-align:center;opacity:0;transition:opacity .8s;pointer-events:none;color:#fff;background:rgba(214,69,122,.82);border-radius:999px;padding:10px 22px;font:italic 18px Georgia,serif;box-shadow:0 4px 14px rgba(0,0,0,.25)}
+</style></head><body>
+<div id="title">Happy Princess Day, Jeeyu 👑</div>
+<button id="btn"></button>
+<div id="wish">Now make a wish you want to be true ✨</div>
+<div id="msg"></div>
+<noscript><p style="text-align:center;padding:30px">Please turn on JavaScript to see this page.</p></noscript>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>window.THREE||document.write('<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"><\/script>')</script>
+<script>
+const NAME='Jeeyu';
+let sd=7;const rnd=()=>(sd=sd*16807%2147483647)/2147483647;
+const msg=document.getElementById('msg');
+function fail(t){msg.textContent=t;msg.style.display='block';document.getElementById('title').style.display='none'}
+if(!window.THREE){fail('Could not load the 3D engine. Please check your internet connection and reload the page.');throw new Error('three missing')}
+const LOW=Math.min(screen.width,screen.height)<500||(navigator.hardwareConcurrency||8)<=4||(navigator.deviceMemory||8)<=4;
+let R;try{R=new THREE.WebGLRenderer({antialias:!LOW,powerPreference:'high-performance'})}catch(e){fail('This browser or device does not support WebGL, so the 3D scene cannot be shown. Please try the latest Chrome, Safari, Edge or Firefox.');throw e}
+let PR=Math.min(window.devicePixelRatio||1,LOW?1.25:2),fpsN=0,fpsS=0;R.setPixelRatio(PR);R.shadowMap.enabled=true;
+R.domElement.style.cssText='position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;touch-action:manipulation';document.body.appendChild(R.domElement);
+R.domElement.addEventListener('webglcontextlost',e=>{e.preventDefault();fail('The graphics were interrupted. Please reload the page.')});
+const S=new THREE.Scene();S.background=new THREE.Color(0xcfd9f2);S.fog=new THREE.Fog(0xe6dcf0,25,120);
+const C=new THREE.PerspectiveCamera(55,1,.1,250);
+S.add(new THREE.HemisphereLight(0xffffff,0x88aa66,.9));
+const sun=new THREE.DirectionalLight(0xfff0dd,.8);sun.castShadow=true;sun.shadow.mapSize.set(LOW?1024:2048,LOW?1024:2048);
+Object.assign(sun.shadow.camera,{left:-25,right:25,top:25,bottom:-25,far:120});S.add(sun,sun.target);
+
+const M=c=>new THREE.MeshLambertMaterial({color:c});
+function mesh(g,c,x=0,y=0,z=0,p=S,shadow=true){const m=new THREE.Mesh(g,M(c));m.position.set(x,y,z);m.castShadow=shadow;p.add(m);return m}
+function tex(w,h,fn){const c=document.createElement('canvas');c.width=w;c.height=h;fn(c.getContext('2d'),w,h);return new THREE.CanvasTexture(c)}
+
+// ground + path
+const gr=mesh(new THREE.PlaneGeometry(300,300),0x93c86d,0,0,-30,S,false);gr.rotation.x=-Math.PI/2;gr.receiveShadow=true;
+const W=[[0,12],[0,-14],[7,-24],[-7,-34],[0,-46],[0,-58]];
+for(let i=0;i<W.length-1;i++){const[a,b]=[W[i],W[i+1]],dx=b[0]-a[0],dz=b[1]-a[1];
+  const p=mesh(new THREE.BoxGeometry(3.4,.05,Math.hypot(dx,dz)),0xdccdb0,(a[0]+b[0])/2,.03,(a[1]+b[1])/2,S,false);p.rotation.y=Math.atan2(dx,dz);p.receiveShadow=true;
+  mesh(new THREE.CylinderGeometry(1.7,1.7,.05,20),0xdccdb0,b[0],.03,b[1],S,false)}
+function dp(x,z){let m=1e9;for(let i=0;i<W.length-1;i++){const[a,b]=[W[i],W[i+1]],dx=b[0]-a[0],dz=b[1]-a[1];
+  let t=Math.max(0,Math.min(1,((x-a[0])*dx+(z-a[1])*dz)/(dx*dx+dz*dz)));m=Math.min(m,Math.hypot(x-a[0]-t*dx,z-a[1]-t*dz))}return m}
+const SPOTS=[[11.5,-24],[-11.5,-34],[0,-17],[-9,-6]];
+const near=(x,z,r)=>SPOTS.some(s=>Math.hypot(x-s[0],z-s[1])<r);
+
+// swaying grass
+const U={value:0};
+const gm=new THREE.MeshLambertMaterial({color:0xffffff});
+gm.onBeforeCompile=s=>{s.uniforms.uT=U;s.vertexShader='uniform float uT;\n'+s.vertexShader.replace('#include <begin_vertex>',
+ 'vec3 transformed=position;vec4 wp=instanceMatrix*vec4(position,1.);transformed.x+=sin(uT*2.+wp.x*.7+wp.z*.5)*.14*position.y;')};
+const GN=LOW?2500:7000,grass=new THREE.InstancedMesh(new THREE.ConeGeometry(.07,.85,3).translate(0,.42,0),gm,GN),dm=new THREE.Object3D(),col=new THREE.Color();
+let gi=0;for(let k=0;k<20000&&gi<GN;k++){const x=-50+100*rnd(),z=-60+85*rnd();if(dp(x,z)<2.3||near(x,z,2.6))continue;
+  dm.position.set(x,0,z);dm.rotation.set((rnd()-.5)*.4,rnd()*6.28,(rnd()-.5)*.4);dm.scale.setScalar(.7+rnd()*.9);dm.updateMatrix();
+  grass.setMatrixAt(gi,dm.matrix);grass.setColorAt(gi,col.setHSL(.24+rnd()*.06,.65,.38+rnd()*.14));gi++}
+grass.count=gi;S.add(grass);
+
+// trees, bushes, gazebo
+for(let k=0;k<44;k++){const x=-55+110*rnd(),z=-65+85*rnd();if(dp(x,z)<5||near(x,z,4)||Math.abs(x)<9&&z<-52)continue;
+  const g=new THREE.Group();g.position.set(x,0,z);S.add(g);mesh(new THREE.CylinderGeometry(.18,.28,2.6,8),0x6a3b3b,0,1.3,0,g);
+  if(k%2){for(const[a,b,c,r]of[[0,3.4,0,1.6],[1.1,3,.3,1.2],[-1,3.1,-.3,1.3]])mesh(new THREE.SphereGeometry(r,12,10),0xf2b5ca,a,b,c,g)}
+  else mesh(new THREE.SphereGeometry(1.8,12,10),0x5aa84a,0,3.5,0,g)}
+for(let i=0;i<14;i++){const z=10-i*1.75,sx=i%2?3.7:-3.7;if(z<-12)break;
+  mesh(new THREE.SphereGeometry(.9,12,10),0x2f7a3a,sx,.7,z);for(let j=0;j<3;j++)mesh(new THREE.SphereGeometry(.14,8,6),0xd62d4f,sx+(rnd()-.5)*1.2,.8+rnd()*.6,z+.8,S,false)}
+const gz=new THREE.Group();gz.position.set(-9,0,-6);S.add(gz);
+for(let i=0;i<6;i++){const a=i*Math.PI/3;mesh(new THREE.CylinderGeometry(.1,.1,3,8),0xffffff,Math.cos(a)*2,1.5,Math.sin(a)*2,gz)}
+mesh(new THREE.ConeGeometry(2.7,1.3,6),0xf08aa6,0,3.6,0,gz);mesh(new THREE.CylinderGeometry(2.2,2.2,.15,6),0xf4eaee,0,.07,0,gz);
+
+// gate with sign: "Welcome, Princess Jeeya"
+const gate=new THREE.Group();gate.position.set(0,0,-17);S.add(gate);
+for(const s of[-3,3])mesh(new THREE.BoxGeometry(.7,4,.7),0xf3f0f2,s,2,0,gate);
+const arch=mesh(new THREE.TorusGeometry(3,.13,8,40,Math.PI),0xe3b341,0,4,0,gate);
+mesh(new THREE.SphereGeometry(.35,12,10),0xe3b341,3,4,0,gate);
+const signT=tex(512,200,(x,w,h)=>{x.fillStyle='#fff8ee';x.fillRect(0,0,w,h);x.strokeStyle='#d9ae45';x.lineWidth=8;x.strokeRect(6,6,w-12,h-12);
+  x.textAlign='center';x.fillStyle='#b05b78';x.font='italic 40px Georgia,serif';x.fillText('Happy Princess Day',w/2,76);
+  x.fillStyle='#2a1b24';x.font='italic 800 78px "Brush Script MT","Segoe Script",cursive';x.fillText(NAME,w/2,155)});
+const sign=new THREE.Mesh(new THREE.PlaneGeometry(4.4,1.72),new THREE.MeshBasicMaterial({map:signT}));sign.position.set(0,5,0);gate.add(sign);
+const leaves=[];for(const s of[-1,1]){const lf=new THREE.Group();lf.position.set(3*s,0,0);gate.add(lf);
+  for(let i=0;i<9;i++)mesh(new THREE.BoxGeometry(.08,2.4,.08),0xe3b341,-s*(.3+i*.3),1.3,0,lf,false);
+  mesh(new THREE.BoxGeometry(2.8,.08,.08),0xe3b341,-s*1.5,.5,0,lf,false);leaves.push([lf,s])}
+
+// castle
+const CZ=-64;
+mesh(new THREE.BoxGeometry(14,10,6),0xf0dfe7,0,5,CZ);
+for(const[x,h,r,z]of[[-9,16,2.2,0],[9,16,2.2,0],[-4.6,13,1.8,-1],[4.6,13,1.8,-1],[0,21,2.6,-4]]){
+  mesh(new THREE.CylinderGeometry(r,r,h,16),0xf0dfe7,x,h/2,CZ+z);mesh(new THREE.ConeGeometry(r*1.25,h*.4,16),0xd23b5b,x,h+h*.2,CZ+z)}
+mesh(new THREE.BoxGeometry(2.4,3.6,.3),0xb2304f,0,1.8,CZ+3.1);mesh(new THREE.CylinderGeometry(1.2,1.2,.3,16).rotateX(Math.PI/2),0xb2304f,0,3.6,CZ+3.1);
+
+// characters
+function person(girl){const g=new THREE.Group(),hair=0x24160f,L=[];
+  if(girl)mesh(new THREE.ConeGeometry(.55,1.1,20),0xf59ab9,0,.75,0,g);
+  else{for(const s of[-.14,.14])L.push(mesh(new THREE.CylinderGeometry(.1,.1,.6,10).translate(0,-.3,0),0x1e2a52,s,.65,0,g));mesh(new THREE.BoxGeometry(.6,.65,.38),0xffffff,0,.98,0,g)}
+  mesh(new THREE.SphereGeometry(.36,20,16),0xf3c7a6,0,1.62,0,g);
+  mesh(new THREE.SphereGeometry(.39,20,16,0,6.3,0,1.5),hair,0,1.65,-.04,g);
+  if(girl)mesh(new THREE.CylinderGeometry(.34,.3,.85,14),hair,0,1.25,-.16,g);
+  for(const s of[-.12,.12])mesh(new THREE.SphereGeometry(.035,8,6),0x222222,s,1.6,.34,g,false);
+  S.add(g);return{g,L}}
+const boy=person(false),girl=person(true);
+const cat=new THREE.Group();S.add(cat);const o=0xf08a2c;
+mesh(new THREE.SphereGeometry(.28,12,10),o,0,.32,0,cat).scale.set(1,.8,1.5);mesh(new THREE.SphereGeometry(.2,12,10),o,0,.5,.38,cat);
+for(const s of[-.1,.1])mesh(new THREE.ConeGeometry(.07,.15,4),o,s,.7,.38,cat);mesh(new THREE.CylinderGeometry(.04,.04,.6,6).rotateX(1),o,0,.5,-.5,cat);
+
+
+
+// dragon on a rock
+const D=new THREE.Group();D.position.set(11.5,0,-24);D.rotation.y=-Math.PI/2;S.add(D);
+mesh(new THREE.SphereGeometry(1,16,10),0x34505a,0,0,0,D).scale.set(2.2,.7,1.7);
+const body=new THREE.Group();body.position.y=.9;D.add(body);
+mesh(new THREE.SphereGeometry(.85,20,16),0x7ccfbd,0,.4,0,body);mesh(new THREE.SphereGeometry(.45,14,10),0xf6e7b8,0,.1,.6,body);
+for(const s of[-1,1]){mesh(new THREE.ConeGeometry(.2,.5,8),0xb89be0,.5*s,1.2,0,body);const w=mesh(new THREE.ConeGeometry(.35,1,3),0xb89be0,1*s,.5,-.2,body);w.rotation.z=-1.2*s}
+const eyes=[-1,1].map(s=>{const e=mesh(new THREE.SphereGeometry(.1,10,8),0x222222,.3*s,.6,.78,body,false);e.scale.y=.15;return e});
+
+// wishing well
+const WL=new THREE.Group();WL.position.set(-11.5,0,-34);S.add(WL);
+mesh(new THREE.CylinderGeometry(1.1,1.2,1,16),0xd2d0da,0,.5,0,WL);mesh(new THREE.CylinderGeometry(.9,.9,.05,16),0x1d2340,0,1.02,0,WL,false);
+for(const s of[-1,1])mesh(new THREE.BoxGeometry(.12,2,.12),0x7a4a3a,1*s,1.9,0,WL);
+mesh(new THREE.ConeGeometry(1.7,.9,4),0xe0536f,0,3.2,0,WL).rotation.y=Math.PI/4;
+const coin=mesh(new THREE.CylinderGeometry(.14,.14,.04,14).rotateX(Math.PI/2),0xffc928,0,-9,0);
+
+// hearts & sparkles
+const T={h:tex(64,64,x=>{x.fillStyle='#ff5c8a';x.beginPath();x.moveTo(32,56);x.bezierCurveTo(4,34,10,8,32,22);x.bezierCurveTo(54,8,60,34,32,56);x.fill()}),
+ s:tex(64,64,x=>{x.fillStyle='#ffd54a';x.beginPath();for(let i=0;i<8;i++){const a=i*Math.PI/4,r=i%2?8:28;x.lineTo(32+Math.sin(a)*r,32-Math.cos(a)*r)}x.closePath();x.fill()})};
+const PL=[];for(let i=0;i<110;i++){const s=new THREE.Sprite(new THREE.SpriteMaterial({map:T.h,transparent:true,depthWrite:false}));s.visible=false;S.add(s);PL.push({s,v:new THREE.Vector3(),l:0,m:1})}
+function emit(p,n,sp=2.5){for(let i=0;i<n;i++){const q=PL.find(o=>o.l<=0);if(!q)return;q.s.material.map=Math.random()<.65?T.h:T.s;
+  q.s.position.copy(p).add(new THREE.Vector3(Math.random()-.5,Math.random()*.5,Math.random()-.5));q.v.set((Math.random()-.5)*sp,1+Math.random()*sp,(Math.random()-.5)*sp);
+  q.l=q.m=1.7;q.s.scale.setScalar(.5+Math.random()*.4);q.s.visible=true}}
+const FN=160,fp=new Float32Array(FN*3);for(let i=0;i<FN;i++)fp.set([-30+60*Math.random(),.3+Math.random()*3.5,-55+70*Math.random()],i*3);
+const ff=new THREE.Points(new THREE.BufferGeometry().setAttribute('position',new THREE.BufferAttribute(fp,3)),new THREE.PointsMaterial({color:0xffffff,size:.16,transparent:true,opacity:.85}));S.add(ff);
+
+// rose bush + the proposal props
+const BP=new THREE.Vector3(-4.8,0,-44);let endShown=true,boyRot=Math.PI;
+mesh(new THREE.SphereGeometry(1,14,10),0x2f7a3a,BP.x,.8,BP.z).scale.set(1.3,.9,1.1);
+for(let i=0;i<8;i++)mesh(new THREE.SphereGeometry(.13,8,6),0xd62d4f,BP.x+(rnd()-.5)*2,.9+rnd()*.7,BP.z+.7,S,false);
+const bushRose=new THREE.Group();bushRose.position.set(BP.x+1.1,1.45,BP.z+.5);S.add(bushRose);
+mesh(new THREE.CylinderGeometry(.03,.03,.5,6),0x2f7a3a,0,-.25,0,bushRose,false);mesh(new THREE.SphereGeometry(.2,12,10),0xe0113f,0,.05,0,bushRose,false);
+const arm=new THREE.Group();arm.position.set(.34,1.15,0);arm.visible=false;boy.g.add(arm);
+mesh(new THREE.CylinderGeometry(.06,.06,.6,8).translate(0,.3,0),0xffffff,0,0,0,arm,false);mesh(new THREE.SphereGeometry(.07,8,6),0xf3c7a6,0,.62,0,arm,false);
+const roseH=new THREE.Group();roseH.position.y=.62;arm.add(roseH);
+mesh(new THREE.CylinderGeometry(.025,.025,.5,6),0x2f7a3a,0,.2,0,roseH,false);mesh(new THREE.SphereGeometry(.16,12,10),0xe0113f,0,.5,0,roseH,false);
+
+const wish=document.getElementById('wish');let wishT=-1,wishDone=false;
+// guided tour
+const ST={1:{f:[0,-70],dur:4.5},2:{f:[11.5,-24],btn:'Wake the dragon',act:wake},3:{f:[-11.5,-34],btn:'Toss a coin',act:toss},4:{f:[0,-70],end:true}};
+const tt=document.getElementById('title'),bt=document.getElementById('btn');
+let seg=0,t=0,state='walk',wait=0,acted=null,heading=Math.PI,hT=Math.PI,phase=0,clock=0,open=0,jump=-1,coinT=-1,coinFrom=new THREE.Vector3(),endT=0;
+const lead=new THREE.Vector3(W[0][0],0,W[0][1]),camP=new THREE.Vector3(0,3,18),camL=new THREE.Vector3();
+const aL=(a,b,k)=>{const d=((b-a+Math.PI)%(2*Math.PI)+2*Math.PI)%(2*Math.PI)-Math.PI;return a+d*k};
+function wake(){eyes.forEach(e=>e.scale.y=1);jump=0;emit(D.position.clone().setY(2.2),24)}
+function toss(){coinT=0;coinFrom.copy(lead).setY(1.5)}
+function go(){bt.style.display='none';if(seg===1)open=.001;state='walk';t=0;acted=null}
+function arrive(){const s=ST[seg];state='wait';wait=0;acted=null;hT=Math.atan2(s.f[0]-lead.x,s.f[1]-lead.z);
+  if(s.btn){bt.textContent=s.btn;bt.style.display='block'}
+  if(s.end)endShown=false}
+bt.onclick=()=>{if(ST[seg]&&ST[seg].end){location.reload();return}const s=ST[seg];if(s&&s.act&&acted===null){acted=wait;bt.style.display='none';s.act()}};
+setTimeout(()=>tt.style.opacity=0,6000);
+
+function resize(){const w=innerWidth,h=innerHeight,a=w/h;R.setPixelRatio(PR);R.setSize(w,h);C.aspect=a;C.fov=Math.min(85,Math.max(50,2*Math.atan(Math.tan(40*Math.PI/180)/a)*180/Math.PI));C.updateProjectionMatrix()}
+addEventListener('resize',resize);addEventListener('orientationchange',()=>setTimeout(resize,250));if(window.visualViewport)visualViewport.addEventListener('resize',resize);resize();
+let last=performance.now();
+(function loop(now){requestAnimationFrame(loop);const dt=Math.min((now-last)/1000,.05);last=now;clock+=dt;U.value=clock;
+  fpsN++;fpsS+=dt;if(fpsS>=2){const fps=fpsN/fpsS;fpsN=0;fpsS=0;if(fps<35&&PR>.75){PR=Math.max(.75,PR-.25);resize();if(PR<=1)sun.castShadow=false}}
+
+  if(state==='walk'){const a=W[seg],b=W[seg+1],d=Math.hypot(b[0]-a[0],b[1]-a[1]);t=Math.min(d,t+dt*3.4);const k=t/d;
+    lead.set(a[0]+(b[0]-a[0])*k,0,a[1]+(b[1]-a[1])*k);hT=Math.atan2(b[0]-a[0],b[1]-a[1]);phase+=dt*9;
+    if(t>=d){seg++;if(seg<W.length-1)arrive();else{seg=4;arrive()}}}
+  else{wait+=dt;const s=ST[seg];
+    if(s.end){endT+=dt;if(wait>5.2&&endT>.18){endT=0;emit(new THREE.Vector3(lead.x+(Math.random()-.5)*6,1,lead.z-2+Math.random()*3),3,3)}}
+    else if(s.btn){if(acted===null&&wait>7){acted=wait;bt.style.display='none';s.act()}if(acted!==null&&(seg===3?wishDone:wait>acted+3.2)){wishDone=false;go()}}
+    else if(wait>s.dur)go()}
+
+  heading=aL(heading,hT,1-Math.exp(-dt*5));
+  const fwd=new THREE.Vector3(Math.sin(heading),0,Math.cos(heading)),right=new THREE.Vector3(Math.cos(heading),0,-Math.sin(heading));
+  const walking=state==='walk',bob=walking?Math.abs(Math.sin(phase))*.07:0,sw=walking?Math.sin(phase)*.6:0;
+  boy.g.position.copy(lead).addScaledVector(right,.55);girl.g.position.copy(lead).addScaledVector(right,-.55);
+  boy.g.position.y=girl.g.position.y=bob;boy.g.rotation.y=girl.g.rotation.y=heading;boy.L[0].rotation.x=sw;boy.L[1].rotation.x=-sw;
+  cat.position.lerp(lead.clone().addScaledVector(fwd,-1.4).addScaledVector(right,1.2),1-Math.exp(-dt*3));cat.rotation.y=heading;cat.position.y=bob*.6;
+  
+
+  if(state==='wait'&&seg===4){const E=wait,home=lead.clone().addScaledVector(right,.55),bp=BP.clone().add(new THREE.Vector3(1.9,0,.4)),gp=girl.g.position,fp2=new THREE.Vector3(gp.x,0,gp.z-1.5);
+    let p,face,wk=false;
+    if(E<1.6){p=home.clone().lerp(bp,E/1.6);face=Math.atan2(bp.x-home.x,bp.z-home.z);wk=true}
+    else if(E<2.6){p=bp;face=Math.atan2(bushRose.position.x-bp.x,bushRose.position.z-bp.z)}
+    else if(E<4.4){p=bp.clone().lerp(fp2,(E-2.6)/1.8);face=Math.atan2(fp2.x-bp.x,fp2.z-bp.z);wk=true}
+    else{p=fp2;face=Math.PI*2}
+    if(wk)phase+=dt*9;
+    const kn=Math.min(1,Math.max(0,(E-4.4)/.8));
+    boy.g.position.set(p.x,(wk?Math.abs(Math.sin(phase))*.07:0)-.35*kn,p.z);
+    boyRot=aL(boyRot,face,1-Math.exp(-dt*10));boy.g.rotation.y=boyRot;boy.g.rotation.x=.3*kn;
+    boy.L[0].rotation.x=wk?Math.sin(phase)*.6:-1.4*kn;boy.L[1].rotation.x=wk?-Math.sin(phase)*.6:1.1*kn;
+    if(E>=2.1&&bushRose.visible){bushRose.visible=false;arm.visible=true}
+    arm.rotation.x=.6+.85*kn;
+    if(E>5.4){if(!endShown){endShown=true;tt.innerHTML='Happy Princess Day, '+NAME+' 👑';tt.style.opacity=1;bt.textContent='Replay';bt.style.display='block';emit(girl.g.position.clone().setY(2),30)}
+      girl.g.position.y=Math.abs(Math.sin((E-5.4)*5))*.12}}
+  if(wishT>=0){wishT+=dt;if(wishT>5){wishT=-1;wish.style.opacity=0;wishDone=true}}
+  if(open>0&&open<1)open=Math.min(1,open+dt*.5);
+  leaves.forEach(([l,s])=>l.rotation.y=-s*open*1.3);
+  if(jump>=0){jump+=dt;body.position.y=.9+Math.abs(Math.sin(jump*6))*.9*Math.max(0,1-jump/1.6);if(jump>1.6){jump=-1;body.position.y=.9}}
+  if(coinT>=0){coinT+=dt;const k=Math.min(1,coinT/1);coin.position.set(coinFrom.x+(WL.position.x-coinFrom.x)*k,coinFrom.y+(1.2-coinFrom.y)*k+Math.sin(k*Math.PI)*3,coinFrom.z+(WL.position.z-coinFrom.z)*k);coin.rotation.y=coinT*12;
+    if(k>=1){coinT=-1;coin.position.y=-9;emit(new THREE.Vector3(WL.position.x,1.3,WL.position.z),26);wishT=0;wish.style.opacity=1}}
+  for(const q of PL)if(q.l>0){q.l-=dt;q.s.position.addScaledVector(q.v,dt);q.v.y-=.4*dt;q.s.material.opacity=Math.max(0,q.l/q.m);if(q.l<=0)q.s.visible=false}
+  for(let i=0;i<FN;i++){let y=fp[i*3+1]+dt*.3;fp[i*3+1]=y>4?.3:y}ff.geometry.attributes.position.needsUpdate=true;
+
+  const side=state==='wait'?(seg===2||seg===3?2.4:seg===4?-3.4:0):0;
+  const tp=lead.clone().addScaledVector(fwd,-4.6).addScaledVector(right,side).setY(2.5);camP.lerp(tp,1-Math.exp(-dt*2.5));C.position.copy(camP);
+  const tl=lead.clone().addScaledVector(fwd,side?3:2).setY(1.3);camL.lerp(tl,1-Math.exp(-dt*3));C.lookAt(camL);
+  sun.position.copy(lead).add(new THREE.Vector3(18,28,10));sun.target.position.copy(lead);
+  R.render(S,C)})(last);
+</script></body></html>
